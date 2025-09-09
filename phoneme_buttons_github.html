@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phoneme Buttons (GitHub Pages)</title>
+<style>
+  :root{--pad:clamp(14px,3vmin,28px)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f7f7f7;color:#111;min-height:100svh;display:grid;place-items:center;padding:var(--pad)}
+  .card{background:#fff;width:min(760px,94vw);border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.08);padding:var(--pad);text-align:center}
+  h1{margin:0 0 4px;font-size:clamp(22px,5vw,30px)}
+  p{margin:6px 0 16px;color:#444}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:6px}
+  button{border:0;border-radius:16px;padding:16px;font-weight:800;cursor:pointer;background:#111;color:#fff}
+  button.secondary{background:#e5e7eb;color:#111}
+  .note{font-size:13px;color:#666;margin-top:10px}
+  audio{width:100%;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Phoneme Buttons</h1>
+  <p>Hosted on GitHub Pages. Click a sound or press <strong>Play All</strong>.</p>
+
+  <div class="grid">
+    <button id="btn-i">/ĭ/ (short i)</button>
+    <button id="btn-e">/ĕ/ (short e)</button>
+    <button id="btn-a">/ă/ (short a)</button>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <button class="secondary" id="playAll">▶ Play All (i → e → a)</button>
+    <button class="secondary" id="stop">⏹ Stop</button>
+  </div>
+
+  <audio id="player" controls></audio>
+  <div class="note">If you moved files into a subfolder, update the FILES URLs below accordingly.</div>
+</div>
+
+<script>
+const BASE = "https://tm2123.github.io/phoneme-demo/";
+const FILES = {
+  i: BASE + "1.short_i_.mp3",
+  e: BASE + "2.short_e_.mp3",
+  a: BASE + "3.short_ae_.mp3"
+};
+
+const audio = document.getElementById('player');
+let playingAll = false;
+let queue = [];
+
+async function playFile(src){
+  try{
+    audio.src = src;
+    await audio.play();
+  }catch(e){
+    console.warn("Could not play:", src, e);
+  }
+}
+
+document.getElementById('btn-i').addEventListener('click', ()=>{ playingAll=false; playFile(FILES.i); });
+document.getElementById('btn-e').addEventListener('click', ()=>{ playingAll=false; playFile(FILES.e); });
+document.getElementById('btn-a').addEventListener('click', ()=>{ playingAll=false; playFile(FILES.a); });
+
+document.getElementById('playAll').addEventListener('click', async ()=>{
+  playingAll = true;
+  queue = [FILES.i, FILES.e, FILES.a];
+  const playNext = async ()=>{
+    if(!playingAll || !queue.length) return;
+    const src = queue.shift();
+    await playFile(src);
+    audio.onended = ()=>{
+      if(playingAll && queue.length){ playNext(); }
+    };
+  };
+  playNext();
+});
+
+document.getElementById('stop').addEventListener('click', ()=>{
+  playingAll = false;
+  queue = [];
+  audio.pause();
+  audio.currentTime = 0;
+});
+</script>
+</body>
+</html>
