@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Local Playlist — Fixed</title>
+<style>
+  :root { font-family: system-ui, Arial, sans-serif; }
+  body { max-width: 760px; margin: 24px auto; padding: 0 12px; }
+  header { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  button { padding: 10px 14px; border-radius: 10px; border: 1px solid #ccc; cursor: pointer; }
+  ul { list-style: none; padding: 0; margin: 12px 0 0; }
+  li { padding: 10px 12px; border: 1px solid #e5e5e5; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  li.active { border-color: #888; background: #f6f6f6; }
+  audio { width: 100%; margin-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Local Playlist</h1>
+</header>
+
+<ul id="list"></ul>
+<audio id="player" controls preload="metadata"></audio>
+
+<script>
+const PLAYLIST = ['1.short_i_.mp3', '2.short_e_.mp3', '3.short_ae_.mp3'];
+
+let index = 0;
+const listEl = document.getElementById('list');
+const audio = document.getElementById('player');
+
+function render(){
+  listEl.innerHTML = "";
+  PLAYLIST.forEach((name,i)=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${name}</span> <button data-i="${i}">Play</button>`;
+    li.querySelector('button').addEventListener('click', ()=>{ index=i; load(); audio.play(); });
+    listEl.appendChild(li);
+  });
+  markActive();
+}
+function load(){
+  audio.src = PLAYLIST[index];
+  audio.play().catch(()=>{});
+  markActive();
+}
+function markActive(){
+  [...document.querySelectorAll('li')].forEach((li,i)=>{
+    li.classList.toggle('active', i===index);
+  });
+}
+audio.addEventListener('ended', ()=>{
+  index = (index + 1) % PLAYLIST.length;
+  load();
+});
+
+render();
+load();
+</script>
+</body>
+</html>
